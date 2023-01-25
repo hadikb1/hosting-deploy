@@ -19,7 +19,7 @@ jobs:
         node-version: 14
     - name: Install commander
       run: |
-        npm install commander        
+        npm install -g commander        
     - name: Install jq
       run: |
         npm install -g jq
