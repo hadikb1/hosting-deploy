@@ -1,4 +1,4 @@
-name: Deploy to Netlify
+name: Create Netlify Account and Deploy
 
 on:
   push:
@@ -6,44 +6,29 @@ on:
       - main
 
 jobs:
-  deploy:
+  create-account:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Sign up to Netlify
-        run: |
-          EMAIL=${GITHUB_ACTOR}@users.noreply.github.com
-          CODE=${{ secrets.GITHUB_CODE }}
-          SITE_NAME= hello
-          echo "Email: $EMAIL"
-          echo "Code: $CODE"
-          echo "Site name: $SITE_NAME"
-          echo "Creating account..."
-          # Sign up to Netlify
-          response=$(curl -s -X POST "https://api.netlify.com/api/v1/users/oauth/github" \
-            -H "Content-Type: application/json" \
-            -d "{\"email\":\"$EMAIL\",\"code\":\"$CODE\",\"site_name\":\"$SITE_NAME\"}")
-          echo "Account created: $response"
-          # Extract the site_id and access_token from the response
-          SITE_ID=$(echo $response | jq -r '.site_id')
-          ACCESS_TOKEN=$(echo $response | jq -r '.access_token')
-          echo "::set-output name=site_id::$SITE_ID"
-          echo "::set-output name=access_token::$ACCESS_TOKEN"
-        id: signup
+    - name: Configure netlify-cli
+      run: |
+        npm install -g netlify-cli
 
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v1.2
-        with:
-          publish-dir: './'
-          production-branch: main
-          deploy-message: "Deploy from GitHub Actions"
-          enable-pull-request-comment: false
-          enable-commit-comment: true
-          overwrites-pull-request-comment: true
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ steps.signup.outputs.access_token }}
-          NETLIFY_SITE_ID: ${{ steps.signup.outputs.site_id }}
-        timeout-minutes: 1
+    - name: Create Netlify Account
+      run: netlify signup --github
+      
+    - name: Retrieve Auth Token
+      run: netlify api access_token.create
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ steps.retrieve_auth_token.outputs.token }}
+        
+    - name: Retrieve Site ID
+      run: netlify api sites.list
+      env:
+        NETLIFY_SITE_ID: ${{ steps.retrieve_site_id.outputs.id }}
+        
+    - name: Deploy to Netlify
+      run: netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --dir=. --prod
