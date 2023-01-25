@@ -35,6 +35,15 @@ jobs:
         id: signup
 
       - name: Deploy to Netlify
-        uses: netlify/actions/cli@latest
+        uses: nwtgck/actions-netlify@v1.2
         with:
-          args: deploy --auth=${{ steps.signup.outputs.access_token }} --site=${{ steps.signup.outputs.site_id }} --dir=.
+          publish-dir: './'
+          production-branch: main
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ steps.signup.outputs.access_token }}
+          NETLIFY_SITE_ID: ${{ steps.signup.outputs.site_id }}
+        timeout-minutes: 1
