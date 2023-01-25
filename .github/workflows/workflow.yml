@@ -15,9 +15,9 @@ jobs:
 
       - name: Sign up to Netlify
         run: |
-          EMAIL=${{ secrets.GITHUB_ACTOR }}@users.noreply.github.com
+          EMAIL=${GITHUB_ACTOR}@users.noreply.github.com
           CODE=${{ secrets.GITHUB_CODE }}
-          SITE_NAME=${{ secrets.NETLIFY_SITE_NAME }}
+          SITE_NAME= hello
           echo "Email: $EMAIL"
           echo "Code: $CODE"
           echo "Site name: $SITE_NAME"
