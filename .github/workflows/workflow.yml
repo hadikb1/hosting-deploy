@@ -1,22 +1,35 @@
 name: Sign up and Deploy
-
 on:
   push:
     branches:
       - main
-
 jobs:
   create-account:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       
     - name: Setup Node.js
-      run: sudo apt install -y jq
-
-
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+    - name: Install commander
+      run: |
+        npm install -g commander        
+    - name: Install jq
+      run: |
+        npm install -g jq
+        npm install -g commander
+    - name: Install other dependencies
+      run: |
+        npm install -g async
+        npm install -g rimraf
+        npm install -g winston
+        npm install -g colors
+    - name: Install jq
+      run: |
+        npm install -g jq
     - name: Sign up to Netlify
       run: |
         NETLIFY_RESPONSE=$(curl -X POST -d '' -H "Content-Type: application/json" -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.netlify.com/api/v1/users/oauth/github)
