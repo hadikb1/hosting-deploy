@@ -1,4 +1,4 @@
-name: Create Netlify Account and Deploy
+name: Sign up and Deploy
 
 on:
   push:
@@ -13,22 +13,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Configure netlify-cli
+    - name: Sign up to Netlify
       run: |
-        npm install -g netlify-cli
-
-    - name: Create Netlify Account
-      run: netlify signup --github
-      
-    - name: Retrieve Auth Token
-      run: netlify api access_token.create
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ steps.retrieve_auth_token.outputs.token }}
-        
-    - name: Retrieve Site ID
-      run: netlify api sites.list
-      env:
-        NETLIFY_SITE_ID: ${{ steps.retrieve_site_id.outputs.id }}
-        
-    - name: Deploy to Netlify
-      run: netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --dir=. --prod
+        NETLIFY_RESPONSE=$(curl -X POST -d '' -H "Content-Type: application/json" -H "Authorization: Bearer ${GITHUB_TOKEN}" https://api.netlify.com/api/v1/users/oauth/github)
+        ACCESS_TOKEN=$(echo $NETLIFY_RESPONSE | jq -r .access_token)
+        echo "Netlify access token is ${ACCESS_TOKEN}"
+        echo "NETLIFY_ACCESS_TOKEN" ${ACCESS_TOKEN} >> $GITHUB_ENV
+        SITE_ID=$(echo $NETLIFY_RESPONSE | jq -r .site_id)
+        echo "Netlify site ID is ${SITE_ID}"
+        echo "NETLIFY_SITE_ID" ${SITE_ID} >> $GITHUB_ENV
