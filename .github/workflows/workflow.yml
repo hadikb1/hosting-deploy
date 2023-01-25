@@ -19,14 +19,16 @@ jobs:
         node-version: 14
     - name: Install commander
       run: |
-        npm install -g commander        
-    - name: Install jq
-      run: |
-        npm install -g jq
+        npm install -g commander
     - name: Install other dependencies
       run: |
         npm install -g async
         npm install -g rimraf
+        npm install -g winston
+    - name: Install jq
+      run: |
+        npm install -g jq
+
 
     - name: Sign up to Netlify
       run: |
